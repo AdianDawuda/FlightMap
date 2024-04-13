@@ -1,0 +1,52 @@
+/* set general properties */
+html {
+    font-family: Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* set header properties */
+#header {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 40px;
+    background-color: #FFEECF;
+    color: #140D00;
+    text-align: center;
+    font-weight: bold;
+    font-size: 150%;
+}
+
+/* set header p properties */
+#header p {
+    margin: 0px;
+    margin-top: 5px;
+}
+
+/* set map properties */
+#map {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    right: 0px;
+    bottom: 40px;
+    background-color: beige;
+}
+
+/* set footer properties */
+#footer {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: 45px;
+    background-color: #FFEECF;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 100%;
+    padding: 0;
+    margin: 0;
+}
