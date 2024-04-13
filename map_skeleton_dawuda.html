@@ -14,12 +14,12 @@
     <script type="text/javascript">
         function init() {
 
-            let jsonData; // Declare jsonData as a global variable
+            let jsonData;
 
 
             const skyURL = "https://opensky-network.org/api/states/all?lamin=45.8389&lomin=5.9962&lamax=47.8229&lomax=10.5226";
 
-            // Define constants for property indexes
+            // Define constants
             const INDEX_ICAO24 = 0;
             const INDEX_CALLSIGN = 1;
             const INDEX_ORIGIN_COUNTRY = 2;
@@ -49,7 +49,7 @@
                         return response.json();
                     })
                     .then((data) => {
-                        // Assign JSON data to the global variable
+                        // Assign JSON data to jsonData
                         jsonData = data;
                         return jsonData;
                     })
@@ -58,7 +58,6 @@
                     });
             }
 
-            // Call the fetchData function with the skyURL
             fetchData(skyURL)
                 .then(() => {
                     let aircraftFeatures = extractAircraftFeatures(jsonData)
@@ -139,13 +138,12 @@
                 });
 
             function extractAircraftFeatures(jsonData) {
-                // Map aircraft data to feature data format
                 const aircraftFeatures = jsonData.states.map((aircraft) => ({
                     coordinates: ol.proj.transform([aircraft[INDEX_LONGITUDE], aircraft[INDEX_LATITUDE]], 'EPSG:4326', 'EPSG:3857'),
                     name: aircraft[INDEX_CALLSIGN],
                     origin: aircraft[INDEX_ORIGIN_COUNTRY],
                     imageSrc: 'data/plane-icon.png',
-                    size: 1.0 // You may adjust the size as needed
+                    size: 1.0
                 }));
                 return aircraftFeatures;
             }
