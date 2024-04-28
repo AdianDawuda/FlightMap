@@ -8,12 +8,12 @@ html {
 /* set header properties */
 #header {
     position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    height: 40px;
-    background-color: #FFEECF;
-    color: #140D00;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px; 
+    background-color: #9c9696;
+    color: #333;
     text-align: center;
     font-weight: bold;
     font-size: 150%;
@@ -21,29 +21,29 @@ html {
 
 /* set header p properties */
 #header p {
-    margin: 0px;
-    margin-top: 5px;
+    margin: 0;
+    margin-top: 10px; 
 }
 
 /* set map properties */
 #map {
     position: absolute;
-    top: 40px;
-    left: 0px;
-    right: 0px;
-    bottom: 40px;
+    top: 60px; 
+    left: 0;
+    right: 0;
+    bottom: 40px; 
     background-color: beige;
 }
 
 /* set footer properties */
 #footer {
     position: absolute;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    height: 45px;
-    background-color: #FFEECF;
-    color: white;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background-color: #9c9696; 
+    color: #333; 
     text-align: center;
     font-weight: bold;
     font-size: 100%;
