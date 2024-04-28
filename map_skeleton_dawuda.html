@@ -10,7 +10,7 @@
     <title>Flight tracker Austria</title>
     <link rel="icon" type="image/x-icon" href="data/favicon.ico">
     <!-- CSS Stylesheets -->
-    <link rel="stylesheet" href="styles_noah.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
     <!-- JavaScript Libraries -->
@@ -21,8 +21,6 @@
         // Initialize the map and related functionalities
 
         let features = [];
-
-            
 
         function init() {
             let jsonData;
@@ -50,47 +48,47 @@
 
 
 
-                // Create layers and initialize the map
-                let vectorSource = new ol.source.Vector({
-                        features: features,
-                    });
-                    let vectorLayer = new ol.layer.Vector({
-                        source: vectorSource,
-                    });
-                    let rasterLayer = new ol.layer.Tile({
-                        source: new ol.source.XYZ({
-                        url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}@2x.png?api_key=1ccc1cb9-0c96-41ad-84ae-cf7022a50d03',
-                        attributions: [
-                            '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>',
-                            '&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>',
-                            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-                        ],
-                        tilePixelRatio: 2,
-                        maxZoom: 20
-                        })
-                    });
+            // Create layers and initialize the map
+            let vectorSource = new ol.source.Vector({
+                features: features,
+            });
+            let vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+            });
+            let rasterLayer = new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}@2x.png?api_key=1ccc1cb9-0c96-41ad-84ae-cf7022a50d03',
+                    attributions: [
+                        '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>',
+                        '&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>',
+                        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+                    ],
+                    tilePixelRatio: 2,
+                    maxZoom: 20
+                })
+            });
 
-                    let map = new ol.Map({
-                        layers: [rasterLayer, vectorLayer],
-                        target: document.getElementById('map'),
-                        controls: ol.control.defaults({
-                            attributionOptions: ({
-                                collapsible: false
-                            })
-                        }).extend([new ol.control.ScaleLine()]),
-                        view: new ol.View({
-                            center: ol.proj.transform([13.4, 47.8], 'EPSG:4326', 'EPSG:3857'),
-                            zoom: 7.5,
-                        }),
-                    });
+            let map = new ol.Map({
+                layers: [rasterLayer, vectorLayer],
+                target: document.getElementById('map'),
+                controls: ol.control.defaults({
+                    attributionOptions: ({
+                        collapsible: false
+                    })
+                }).extend([new ol.control.ScaleLine()]),
+                view: new ol.View({
+                    center: ol.proj.transform([13.4, 47.8], 'EPSG:4326', 'EPSG:3857'),
+                    zoom: 7.5,
+                }),
+            });
 
 
             fetchAndDraw();
-            setInterval(function(){
+            setInterval(function () {
                 fetchAndDraw()
             }, 20000);
 
-            
+
             // Function to fetch JSON data from the specified URL
             function fetchData(url) {
                 return fetch(url)
@@ -113,32 +111,32 @@
 
             function fetchAndDraw() {
 
-            // Fetch data from the specified URL
-            fetchData(skyURL)
-                .then(() => {
-                    // Clear existing features
-                // Array to store features for markers
-                vectorSource.clear();
-                features = [];
-                    console.log(features);
-                    // Extract aircraft features from JSON data
-                    let aircraftFeatures = extractAircraftFeatures(jsonData);
-                    // Draw markers for each aircraft feature
-                    for (const data of aircraftFeatures) {
-                        drawMarker(data);
-                    }
+                // Fetch data from the specified URL
+                fetchData(skyURL)
+                    .then(() => {
+                        // Clear existing features
+                        // Array to store features for markers
+                        vectorSource.clear();
+                        features = [];
+                        console.log(features);
+                        // Extract aircraft features from JSON data
+                        let aircraftFeatures = extractAircraftFeatures(jsonData);
+                        // Draw markers for each aircraft feature
+                        for (const data of aircraftFeatures) {
+                            drawMarker(data);
+                        }
 
-            vectorSource.cle
-            // Update the vector source with new features
-            vectorSource.addFeatures(features);
+                        vectorSource.cle
+                        // Update the vector source with new features
+                        vectorSource.addFeatures(features);
 
-            // Refresh the vector layer
-            vectorLayer.getSource().refresh();
+                        // Refresh the vector layer
+                        vectorLayer.getSource().refresh();
 
-                    console.log(features);
-                    // Initialize popups for markers on the map
-                    initPopups(map);
-                });
+                        console.log(features);
+                        // Initialize popups for markers on the map
+                        initPopups(map);
+                    });
 
             }
 
@@ -198,13 +196,12 @@
                     name: aircraft[INDEX_CALLSIGN],
                     origin: aircraft[INDEX_ORIGIN_COUNTRY],
                     imageSrc: 'data/plane-icon.png',
-                    size: 0.5
+                    size: 0.5,
+                    rotation: aircraft[INDEX_TRUE_TRACK] / 180 * Math.PI
                 }));
                 return aircraftFeatures;
             }
         }
-
-
 
         // Function to draw a marker on the map
         function drawMarker(posMarker) {
@@ -220,11 +217,13 @@
                     anchorYUnits: 'pixels',
                     src: posMarker.imageSrc,
                     scale: posMarker.size,
+                    rotation: posMarker.rotation,
                 }),
             });
             feature.setStyle(iconStyle);
             features.push(feature);
         }
+
     </script>
 </head>
 
