@@ -12,8 +12,8 @@ html {
     left: 0;
     right: 0;
     height: 60px; 
-    background-color: #9c9696;
-    color: #333;
+    background-color: #0e0e0e;
+    color: #d3d3d3;
     text-align: center;
     font-weight: bold;
     font-size: 150%;
@@ -30,9 +30,22 @@ html {
     position: absolute;
     top: 60px; 
     left: 0;
-    right: 0;
+    right: 400px;
     bottom: 40px; 
-    background-color: beige;
+    background-color: #333333;
+}
+
+/* set panel properties*/
+#panel {
+    position: absolute;
+    padding: 20px;
+    top: 60px; 
+    right: 0; 
+    width: 400px;
+    height: 100%; 
+    background-color: #252525;
+    color: #d3d3d3;
+    bottom: 40px; 
 }
 
 /* set footer properties */
@@ -42,8 +55,8 @@ html {
     left: 0;
     right: 0;
     height: 40px;
-    background-color: #9c9696; 
-    color: #333; 
+    background-color: #0e0e0e; 
+    color: #d3d3d3; 
     text-align: center;
     font-weight: bold;
     font-size: 100%;
