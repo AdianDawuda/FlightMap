@@ -230,7 +230,6 @@
                 //Declare variable to store popover instance
                 let popover;
 
-                //function to initially dispose popover
                 function disposePopover() {
                     if (popover) {
                         popover.dispose();
@@ -247,28 +246,31 @@
                     if (!feature) {
                         return;
                     }
-                    //set popup position at the clicked coordinate
                     popup.setPosition(evt.coordinate);
-
-                    //create popover instance with flight information
                     popover = new bootstrap.Popover(element, {
                         placement: 'top',
                         html: true,
-                        content: 'Flight information: ' + '<br>Aircraft call sign: ' + feature.get('name') + '<br>Country of origin: ' + feature.get('origin'),
+                        content: 
+                        '<b>Flight information: </b>' + 
+                        '<br>Aircraft call sign: ' + feature.get('name') + 
+                        '<br>Country of origin: ' + feature.get('origin') +
+                        '<br>Aircraft Altitude (m): ' + feature.get('altitude') + 
+                        '<br>Aircraft Velocity (km/h): ' + feature.get('velocity'),
+
                     });
                     popover.show();
                 });
 
-                //Close the popup when the map is moved
-                map.on('movestart', disposePopover);
-            }
-
-             //Another functionality: change mouse cursor when over marker
-             map.on('pointermove', function (e) {
+                // Change mouse cursor when over marker
+                map.on('pointermove', function (e) {
                     const pixel = map.getEventPixel(e.originalEvent);
                     const hit = map.hasFeatureAtPixel(pixel);
                     map.getTarget().style.cursor = hit ? 'pointer' : '';
                 });
+
+                // Close the popup when the map is moved
+                map.on('movestart', disposePopover);
+            }
 
             // Function to extract aircraft features from JSON data
             function extractAircraftFeatures(jsonData) {
@@ -276,6 +278,9 @@
                     coordinates: ol.proj.transform([aircraft[INDEX_LONGITUDE], aircraft[INDEX_LATITUDE]], 'EPSG:4326', 'EPSG:3857'),
                     name: aircraft[INDEX_CALLSIGN],
                     origin: aircraft[INDEX_ORIGIN_COUNTRY],
+                    category: aircraft[INDEX_CATEGORY],
+                    altitude: aircraft[INDEX_GEO_ALTITUDE],
+                    velocity: aircraft[INDEX_VELOCITY] * 3.6,
                     imageSrc: 'data/plane-icon.png',
                     size: 0.5,
                     rotation: aircraft[INDEX_TRUE_TRACK] / 180 * Math.PI
@@ -284,12 +289,15 @@
             }
         }
 
-        //Function to draw a marker on the map
+        // Function to draw a marker on the map
         function drawMarker(posMarker) {
             const feature = new ol.Feature({
                 geometry: new ol.geom.Point(posMarker.coordinates),
                 name: posMarker.name,
                 origin: posMarker.origin,
+                altitude: posMarker.altitude,
+                velocity: posMarker.velocity
+
             });
             //Style marker and apply the style on the markers
             const iconStyle = new ol.style.Style({
@@ -310,7 +318,7 @@
 </head>
 
 <!-- HTML body -->
-<body onload="init();">
+<body style="overflow: hidden;" onload="init();">
 
     <!-- Header -->
     <div id="header">

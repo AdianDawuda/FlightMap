@@ -42,10 +42,11 @@ html {
     top: 60px; 
     right: 0; 
     width: 400px;
-    height: 90%; 
+    height: 100%; 
     background-color: #252525;
     color: #d3d3d3;
     bottom: 40px; 
+    overflow: scroll;
 }
 
 /* set footer properties */
