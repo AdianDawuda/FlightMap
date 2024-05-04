@@ -147,7 +147,7 @@
             //Set an automated update interval to 20sec
             setInterval(function () {
                 fetchAndDraw()
-            }, 20000);
+            }, 5000);
 
             //add layer switcher
             const layerSwitcher = new ol.control.LayerSwitcher({
@@ -220,23 +220,18 @@
                 wfsLayer.getSource().forEachFeature((feature) => {
                     WFSgeometries.push(feature.getGeometry());
                 });
-                console.log(WFSgeometries);
                 return WFSgeometries;
             }
 
             // Function to check if a marker is within any of the WFS geometries
             function isMarkerWithinGeometries(markerData, wfsGeometries) {
                 const markerCoordinates = [markerData.coordinates[0], markerData.coordinates[1]];
-                console.log("Marker coordinates:", markerCoordinates);
                 const markerPoint = new ol.geom.Point(markerCoordinates);
                 for (const geometry of wfsGeometries) {
-                    console.log("Checking against WFS Geometry:", geometry);
                     if (geometry.intersectsCoordinate(markerCoordinates)) {
-                        console.log("Marker within WFS Geometry:", markerData);
                         return true;
                     }
                 }
-                console.log("Marker not within any WFS Geometry:", markerData);
                 return false;
             }
 
