@@ -5,6 +5,11 @@ html {
     padding: 0;
 }
 
+body {
+    overflow: hidden;
+}
+
+
 /* set header properties */
 #header {
     position: absolute;
@@ -31,7 +36,7 @@ html {
     top: 60px; 
     left: 0;
     right: 400px;
-    bottom: 40px; 
+    bottom: 0px; 
     background-color: #333333;
 }
 
@@ -45,8 +50,10 @@ html {
     height: 100%; 
     background-color: #252525;
     color: #d3d3d3;
-    bottom: 40px; 
-    overflow: scroll;
+    bottom: 0px; 
+    overflow: auto;
+    scrollbar-width: thin;
+
 }
 
 /* set footer properties */
@@ -55,7 +62,7 @@ html {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 40px;
+    height: 0px;
     background-color: #0e0e0e; 
     color: #d3d3d3; 
     text-align: center;
