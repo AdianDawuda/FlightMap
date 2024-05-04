@@ -114,6 +114,19 @@
                 }),
             });
 
+// Listen to the change event of the WFS source
+AustriaWFS.getSource().on('change', function (e) {
+    if (AustriaWFS.getSource().getState() === 'ready') {
+        // If the state of the source is 'ready', execute fetchAndDraw
+        fetchAndDraw();
+        // Also clear the event listener to prevent multiple executions
+        AustriaWFS.getSource().un('change', arguments.callee);
+    }
+});
+            //Set an automated update interval to 5 sec
+            setInterval(function () {
+                fetchAndDraw()
+            }, 5000);
 
             // Create layer groups for basemaps, aircraft, and the WFS
             let map = new ol.Map({
@@ -138,16 +151,11 @@
                 //Initial view settings set to Austria with an appropriate zoom factor
                 view: new ol.View({
                     center: ol.proj.transform([13.4, 47.8], 'EPSG:4326', 'EPSG:3857'),
-                    zoom: 8.3,
+                    zoom: 8,
                 }),
             });
 
-            //Call fetchAndDraw function
-            fetchAndDraw();
-            //Set an automated update interval to 20sec
-            setInterval(function () {
-                fetchAndDraw()
-            }, 5000);
+
 
             //add layer switcher
             const layerSwitcher = new ol.control.LayerSwitcher({
@@ -182,31 +190,25 @@
                 fetchData(skyURL)
                     .then(() => {
                         //Clear existing features
-                        //Array to store features for markers
                         vectorSource.clear();
+                        //Array to store features for markers
                         features = [];
-                        //Print features
-                        console.log(features);
                         //Extract aircraft features from JSON data
                         let aircraftFeatures = extractAircraftFeatures(jsonData);
                         //Extract geometries from WFS layer
                         let wfsGeometries = extractWFSGeometries(AustriaWFS);
                         //Draw markers for each aircraft feature
-                        for (const data of aircraftFeatures) {
+                        for (let data of aircraftFeatures) {
                             //Check if the marker is within any of the WFS geometries
                             if (isMarkerWithinGeometries(data, wfsGeometries)) {
-                            drawMarker(data);
+                                drawMarker(data);
                             }
                         }
-
-                        vectorSource.cle
                         // Update the vector source with new features
                         vectorSource.addFeatures(features);
 
                         // Refresh the vector layer
                         vectorLayer.getSource().refresh();
-
-                        console.log(features);
 
                         // Initialize popups for markers on the map
                         initPopups(map);
@@ -331,7 +333,7 @@
             //Style marker and apply the style on the markers
             const iconStyle = new ol.style.Style({
                 image: new ol.style.Icon({
-                    anchor: [0.5, 46],
+                    anchor: [0.5, 0.5],
                     anchorXUnits: 'fraction',
                     anchorYUnits: 'pixels',
                     src: posMarker.imageSrc,
@@ -375,9 +377,11 @@
         <!-- Provide information on data sources -->
         <h4 style="text-align: center;">Data</h4>
         <ul>
-            <li> REST API for flight information: <a href="https://opensky-network.org/" target="_blank">OpenSky Network</a></li>
+            <li> REST API for flight information: <a href="https://opensky-network.org/" target="_blank">OpenSky
+                    Network</a></li>
             <li> Basemaps: <a href="https://stadiamaps.com/" target="_blank">Stadia Maps basemaps</a></li>
-            <li> Austrian borders: <a href="https://data.statistik.gv.at/web/meta.jsp?dataset=OGDEXT_REG_SRV_1" target="_blank">WFS Regionale Gliederungen</a></li>
+            <li> Austrian borders: <a href="https://data.statistik.gv.at/web/meta.jsp?dataset=OGDEXT_REG_SRV_1"
+                    target="_blank">WFS Regionale Gliederungen</a></li>
         </ul>
         <p>A more detailed overview and all of the code for this project can be found in <a
                 href="https://github.com/AdianDawuda/FlightMap" target="_blank">the project's GitHub repository</a>.</p>
