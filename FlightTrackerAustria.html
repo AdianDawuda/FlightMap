@@ -100,7 +100,7 @@
             const AustriaWFS = new ol.layer.Vector({
                 source: new ol.source.Vector({
                     format: new ol.format.GeoJSON(),
-                    url: 'https://www.statistik.at/gs-open/GEODATA/wfs?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typename=STATISTIK_AUSTRIA_NUTS2_20240101&srsName=EPSG:4326&outputFormat=application/json',
+                    url: 'https://www.statistik.at/gs-open/GEODATA/wfs?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typename=STATISTIK_AUSTRIA_NUTS2_20240101&srsName=EPSG:3857&outputFormat=application/json',
                 }),
                 //Style for WFS
                 style: new ol.style.Style({
@@ -135,7 +135,7 @@
                         collapsible: false
                     })
                 }).extend([new ol.control.ScaleLine()]),
-                //Initial view settings set to Austria with an according zoom factor
+                //Initial view settings set to Austria with an appropriate zoom factor
                 view: new ol.View({
                     center: ol.proj.transform([13.4, 47.8], 'EPSG:4326', 'EPSG:3857'),
                     zoom: 8.3,
@@ -181,17 +181,22 @@
                 // Fetch data from the specified URL
                 fetchData(skyURL)
                     .then(() => {
-                        // Clear existing features
-                        // Array to store features for markers
+                        //Clear existing features
+                        //Array to store features for markers
                         vectorSource.clear();
                         features = [];
                         //Print features
                         console.log(features);
-                        // Extract aircraft features from JSON data
+                        //Extract aircraft features from JSON data
                         let aircraftFeatures = extractAircraftFeatures(jsonData);
-                        // Draw markers for each aircraft feature
+                        //Extract geometries from WFS layer
+                        let wfsGeometries = extractWFSGeometries(AustriaWFS);
+                        //Draw markers for each aircraft feature
                         for (const data of aircraftFeatures) {
+                            //Check if the marker is within any of the WFS geometries
+                            if (isMarkerWithinGeometries(data, wfsGeometries)) {
                             drawMarker(data);
+                            }
                         }
 
                         vectorSource.cle
@@ -207,6 +212,32 @@
                         initPopups(map);
                     });
 
+            }
+
+            // Function to extract geometries from WFS layer
+            function extractWFSGeometries(wfsLayer) {
+                let WFSgeometries = [];
+                wfsLayer.getSource().forEachFeature((feature) => {
+                    WFSgeometries.push(feature.getGeometry());
+                });
+                console.log(WFSgeometries);
+                return WFSgeometries;
+            }
+
+            // Function to check if a marker is within any of the WFS geometries
+            function isMarkerWithinGeometries(markerData, wfsGeometries) {
+                const markerCoordinates = [markerData.coordinates[0], markerData.coordinates[1]];
+                console.log("Marker coordinates:", markerCoordinates);
+                const markerPoint = new ol.geom.Point(markerCoordinates);
+                for (const geometry of wfsGeometries) {
+                    console.log("Checking against WFS Geometry:", geometry);
+                    if (geometry.intersectsCoordinate(markerCoordinates)) {
+                        console.log("Marker within WFS Geometry:", markerData);
+                        return true;
+                    }
+                }
+                console.log("Marker not within any WFS Geometry:", markerData);
+                return false;
             }
 
             function initPopups(map) {
@@ -349,9 +380,9 @@
         <!-- Provide information on data sources -->
         <h4 style="text-align: center;">Data</h4>
         <ul>
-            <li><a href="https://opensky-network.org/" target="_blank">OpenSky Network</a> REST API for flight
-                information.</li>
-            <li><a href="https://stadiamaps.com/" target="_blank">Stadia Maps basemaps</a></li>
+            <li> REST API for flight information: <a href="https://opensky-network.org/" target="_blank">OpenSky Network</a></li>
+            <li> Basemaps: <a href="https://stadiamaps.com/" target="_blank">Stadia Maps basemaps</a></li>
+            <li> Austrian borders: <a href="https://data.statistik.gv.at/web/meta.jsp?dataset=OGDEXT_REG_SRV_1" target="_blank">WFS Regionale Gliederungen</a></li>
         </ul>
         <p>A more detailed overview and all of the code for this project can be found in <a
                 href="https://github.com/AdianDawuda/FlightMap" target="_blank">the project's GitHub repository</a>.</p>
