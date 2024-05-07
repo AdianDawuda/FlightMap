@@ -114,15 +114,15 @@
                 }),
             });
 
-// Listen to the change event of the WFS source
-AustriaWFS.getSource().on('change', function (e) {
-    if (AustriaWFS.getSource().getState() === 'ready') {
-        // If the state of the source is 'ready', execute fetchAndDraw
-        fetchAndDraw();
-        // Also clear the event listener to prevent multiple executions
-        AustriaWFS.getSource().un('change', arguments.callee);
-    }
-});
+            // Listen to the change event of the WFS source
+            AustriaWFS.getSource().on('change', function (e) {
+                if (AustriaWFS.getSource().getState() === 'ready') {
+                    // If the state of the source is 'ready', execute fetchAndDraw
+                    fetchAndDraw();
+                    // Also clear the event listener to prevent multiple executions
+                    AustriaWFS.getSource().un('change', arguments.callee);
+                }
+            });
             //Set an automated update interval to 5 sec
             setInterval(function () {
                 fetchAndDraw()
@@ -312,12 +312,25 @@ AustriaWFS.getSource().on('change', function (e) {
                     category: aircraft[INDEX_CATEGORY],
                     altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000,  // converted from m to km and rounded to 2 decimals
                     velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6),       // converted from m/s to km/h and rounded to closest whole number
-                    imageSrc: 'data/plane-icon.png',
+                    imageSrc: getMarkerImageSrc(), // Change aircraft icon according to basemap (dark/light) 
                     size: 0.5,
                     rotation: aircraft[INDEX_TRUE_TRACK] / 180 * Math.PI        // adjusted for initial rotation of plane icon
                 }));
                 return aircraftFeatures;
             }
+
+            // Function to get the appropriate marker image source based on the basemap
+            function getMarkerImageSrc() {
+                // Check the current basemap style
+                const currentBasemap = stadiaLayers.find(layer => layer.getVisible()).get('title');
+                // If the basemap is 'alidade_smooth', return the path for a different marker image
+                if (currentBasemap === 'Stadia Light') {
+                    return 'data/plane-icon_red.png'; // Change this to the path of the dark aircraft icons
+                }
+                // Otherwise, return the default white aircraft icon
+                return 'data/plane-icon.png';
+            }
+
         }
 
         // Function to draw a marker on the map
