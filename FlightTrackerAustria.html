@@ -31,7 +31,7 @@
 
         function init() { //function to initialize the map and its functionalities 
 
-            //Variable to store fetched API JSON data
+            //letiable to store fetched API JSON data
             let jsonData;
             //URL to fetch live flight data for Austria's bounding box
             const skyURL = "https://opensky-network.org/api/states/all?lamin=46.3721&lomin=9.5308&lamax=49.0205&lomax=17.1607";
@@ -66,16 +66,16 @@
             });
 
             //Array to store Stadia Maps basemap layers
-            var stadiaLayers = [];
+            let stadiaLayers = [];
             //Names of Stadia Maps basemap styles
-            var stadiaStyles = ['alidade_smooth', 'alidade_smooth_dark'];
+            let stadiaStyles = ['alidade_smooth', 'alidade_smooth_dark'];
             //Label names for the basemap styles
-            var stadiaLabelNames = ['Stadia Light', 'Stadia Dark'];
+            let stadiaLabelNames = ['Stadia Light', 'Stadia Dark'];
             //Initial visibility of basemap layers
-            var visibility = ['false', 'true'];
+            let visibility = ['false', 'true'];
 
             //Loop through basemap styles to create corresponding layers
-            for (var i = 0; i < stadiaStyles.length; i++) {
+            for (let i = 0; i < stadiaStyles.length; i++) {
                 stadiaLayers.push(new ol.layer.Tile({
                     title: stadiaLabelNames[i],
                     type: 'base',
@@ -248,7 +248,7 @@
                 //add popup overlay to the map
                 map.addOverlay(popup);
 
-                //Declare variable to store popover instance
+                //Declare letiable to store popover instance
                 let popover;
 
                 function disposePopover() {
@@ -346,8 +346,8 @@
             //Style marker and apply the style on the markers
             const iconStyle = new ol.style.Style({
                 image: new ol.style.Icon({
-                    anchor: [0.5, 0.5],
-                    anchorXUnits: 'fraction',
+                    anchor: [0, 0],
+                    anchorXUnits: 'pixels',
                     anchorYUnits: 'pixels',
                     src: posMarker.imageSrc,
                     scale: posMarker.size,
