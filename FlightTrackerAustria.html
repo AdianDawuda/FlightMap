@@ -325,10 +325,10 @@
                 const currentBasemap = stadiaLayers.find(layer => layer.getVisible()).get('title');
                 // If the basemap is 'alidade_smooth', return the path for a different marker image
                 if (currentBasemap === 'Stadia Light') {
-                    return 'data/plane-icon_red.png'; // Change this to the path of the dark aircraft icons
+                    return 'data/plane-icon-dark.png'; // Change this to the path of the dark aircraft icons
                 }
                 // Otherwise, return the default white aircraft icon
-                return 'data/plane-icon.png';
+                return 'data/plane-icon-light.png';
             }
 
         }
