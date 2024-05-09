@@ -29,6 +29,31 @@
         //Array to store features for the markers
         let features = [];
 
+        // Function to draw a marker on the map
+        function drawMarker(posMarker) {
+            const feature = new ol.Feature({
+                geometry: new ol.geom.Point(posMarker.coordinates),
+                name: posMarker.name,
+                origin: posMarker.origin,
+                altitude: posMarker.altitude,
+                velocity: posMarker.velocity
+
+            });
+            //Style marker and apply the style on the markers
+            const iconStyle = new ol.style.Style({
+                image: new ol.style.Icon({
+                    anchor: [0, 0],
+                    anchorXUnits: 'pixels',
+                    anchorYUnits: 'pixels',
+                    src: posMarker.imageSrc,
+                    scale: posMarker.size,
+                    rotation: posMarker.rotation,
+                }),
+            });
+            feature.setStyle(iconStyle);
+            features.push(feature);
+        }
+
         function init() { //function to initialize the map and its functionalities 
 
             //letiable to store fetched API JSON data
@@ -61,7 +86,7 @@
                 features: features,
             });
 
-            let vectorLayer = new ol.layer.Vector({
+            let aircraftLayer = new ol.layer.Vector({
                 source: vectorSource,
             });
 
@@ -128,7 +153,7 @@
                 fetchAndDraw()
             }, 5000);
 
-            // Create layer groups for basemaps, aircraft, and the WFS
+            // Create layer groups for basemaps, WFS, and aircraft layer
             let map = new ol.Map({
                 layers: [
                     new ol.layer.Group({
@@ -139,7 +164,7 @@
                         title: 'Austria borders',
                         combine: false,
                         layers: [AustriaWFS]
-                    }), vectorLayer],
+                    }), aircraftLayer],
                 //Target element to render the map            
                 target: document.getElementById('map'),
                 //Map controls
@@ -191,7 +216,7 @@
                     .then(() => {
                         //Clear existing features
                         vectorSource.clear();
-                        //Array to store features for markers
+                        //Empty features array
                         features = [];
                         //Extract aircraft features from JSON data
                         let aircraftFeatures = extractAircraftFeatures(jsonData);
@@ -207,8 +232,8 @@
                         // Update the vector source with new features
                         vectorSource.addFeatures(features);
 
-                        // Refresh the vector layer
-                        vectorLayer.getSource().refresh();
+                        // Refresh the aircraft layer
+                        aircraftLayer.getSource().refresh();
 
                         // Initialize popups for markers on the map
                         initPopups(map);
@@ -258,15 +283,15 @@
                     }
                 }
 
-                // Display popup on click only for vector layer features
+                // Display popup on click only for aircraft layer features
                 map.on('singleclick', function (evt) {
                     const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                        if (layer == vectorLayer) {
+                        if (layer == aircraftLayer) {
                             return feature;
                         }
                     }, {
                         layerFilter: function (layer) {
-                            return layer == vectorLayer;
+                            return layer == aircraftLayer;
                         }
                     });
                     disposePopover();
@@ -287,12 +312,12 @@
                     popover.show();
                 });
 
-                // Change mouse cursor when over vector layer feature
+                // Change mouse cursor when over aircraft layer feature
                 map.on('pointermove', function (e) {
                     const pixel = map.getEventPixel(e.originalEvent);
                     const hit = map.hasFeatureAtPixel(pixel, {
                         layerFilter: function (layer) {
-                            return layer == vectorLayer;
+                            return layer == aircraftLayer;
                         }
                     });
                     map.getTarget().style.cursor = hit ? 'pointer' : '';
@@ -310,7 +335,7 @@
                     name: aircraft[INDEX_CALLSIGN],
                     origin: aircraft[INDEX_ORIGIN_COUNTRY],
                     category: aircraft[INDEX_CATEGORY],
-                    altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000,  // converted from m to km and rounded to 2 decimals
+                    altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000,  // converted from m to km and rounded to 3 decimals
                     velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6),       // converted from m/s to km/h and rounded to closest whole number
                     imageSrc: getMarkerImageSrc(), // Change aircraft icon according to basemap (dark/light) 
                     size: 0.5,
@@ -331,31 +356,6 @@
                 return 'data/plane-icon-light.png';
             }
 
-        }
-
-        // Function to draw a marker on the map
-        function drawMarker(posMarker) {
-            const feature = new ol.Feature({
-                geometry: new ol.geom.Point(posMarker.coordinates),
-                name: posMarker.name,
-                origin: posMarker.origin,
-                altitude: posMarker.altitude,
-                velocity: posMarker.velocity
-
-            });
-            //Style marker and apply the style on the markers
-            const iconStyle = new ol.style.Style({
-                image: new ol.style.Icon({
-                    anchor: [0, 0],
-                    anchorXUnits: 'pixels',
-                    anchorYUnits: 'pixels',
-                    src: posMarker.imageSrc,
-                    scale: posMarker.size,
-                    rotation: posMarker.rotation,
-                }),
-            });
-            feature.setStyle(iconStyle);
-            features.push(feature);
         }
 
     </script>
@@ -381,11 +381,12 @@
         <!-- Provide general information about the application and it's stakeholders -->
         <h4 style="text-align: center;">About</h4>
         <p>This project showcases a web-based application using HTML, CSS, and JavaScript with the OpenLayers library to
-            display real-time flight data over Austria.</p>
+            display real-time flight data over Austria. The application parses and makes use of sourced data with JavaScript functions, 
+            providing input for the OpenLayers map.</p>
 
         <p>Primary stakeholders for this project currently include aviation enthusiasts and fellow web developers.
             In the future, with further development, this application can prove useful for professional use and could be
-            partially or entirely offered as a service. </p>
+            partially or entirely offered as a service.</p>
 
         <!-- Provide information on data sources -->
         <h4 style="text-align: center;">Data</h4>
@@ -404,8 +405,7 @@
             library.
             A more detailed overview and all of the code for this project can be found in
             <a href="https://github.com/AdianDawuda/FlightMap" target="_blank">the project's GitHub repository</a>.
-            The code contains extensive inline documentation explaining all key parts.
-        </p>
+            The code contains extensive inline documentation explaining all key parts.</p>
 
         <h4 style="text-align: center;">Authors</h4>
 
