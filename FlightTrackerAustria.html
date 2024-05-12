@@ -24,9 +24,12 @@
       href="https://openlayers.org/en/v5.3.0/css/ol.css"
       type="text/css"
     />
-     <!-- CSS Libraries -->
+    <!-- CSS Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <!-- JavaScript Libraries -->
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -372,11 +375,11 @@
             origin: aircraft[INDEX_ORIGIN_COUNTRY],
             category: aircraft[INDEX_CATEGORY],
             // convert from m to km and rounded to 3 decimals
-            altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000, 
+            altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000,
             // converted from m/s to km/h and rounded to closest whole number
-            velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6), 
+            velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6),
             // Change aircraft icon according to basemap (dark/light)
-            imageSrc: getMarkerImageSrc(), 
+            imageSrc: getMarkerImageSrc(),
             size: 0.5,
             rotation: (aircraft[INDEX_TRUE_TRACK] / 180) * Math.PI, // adjusted for initial rotation of plane icon
           }));
@@ -402,10 +405,10 @@
 
   <!-- HTML body -->
 
-  <body class="text-md text-white" onload="init();">
+  <body class="text-md " onload="init();">
     <!-- Header -->
     <div id="header">
-      <p>Live Flight Tracker Austria</p>
+      <p class="text-white">Live Flight Tracker Austria</p>
     </div>
 
     <!-- Map Container -->
@@ -414,36 +417,36 @@
     </div>
 
     <!-- Panel -->
-    <div id="panel">
+    <div class="text-white" id="panel">
       <!-- Provide general information about the application and it's stakeholders -->
-      <h4 class="text-center text-md font-bold">About </h4>
+      <h4 class="text-center  text-md font-bold">About</h4>
       <p>
         This project showcases a web-based application using HTML, CSS, and
         JavaScript with the OpenLayers library to display real-time flight data
         over Austria. The application parses and makes use of sourced data with
         JavaScript functions, providing input for the OpenLayers map.
-      </p> 
+      </p>
 
       <p class="pt-3">
-        Primary stakeholders for this project include aviation
-        enthusiasts and web developers. With further
-        development, this application can prove useful for professional use and
-        could be partially or entirely offered as a service.
+        Primary stakeholders for this project include aviation enthusiasts and
+        web developers. With further development, this application can prove
+        useful for professional use and could be partially or entirely offered
+        as a service.
       </p>
 
       <!-- Provide information on data sources -->
-      <h4 class="text-center text-md py-2 font-bold ">Data</h4>
+      <h4 class="text-center text-md py-2 font-bold">Data</h4>
       <ul>
         <li>
           Aircraft information:
           <a href="https://opensky-network.org/" target="_blank"
-            >OpenSky Network</a
+            ><span class="italic text-blue-500">OpenSky Network</span></a
           >
         </li>
         <li>
           Basemaps:
           <a href="https://stadiamaps.com/" target="_blank"
-            >Stadia Maps basemaps</a
+            ><span class="italic text-blue-500">Stadia Maps basemaps</span></a
           >
         </li>
         <li>
@@ -451,12 +454,12 @@
           <a
             href="https://data.statistik.gv.at/web/meta.jsp?dataset=OGDEXT_REG_SRV_1"
             target="_blank"
-            >Statistik Austria</a
+            ><span class="italic text-blue-500">Statistik Austria</span></a
           >
         </li>
       </ul>
 
-      <h4 class="text-center text-md py-2  font-bold">Implementation</h4>
+      <h4 class="text-center text-md py-2 font-bold">Implementation</h4>
 
       <p>
         This flight tracking application is developed using HTML, CSS, and
@@ -477,7 +480,9 @@
           ><span class="italic text-blue-500">geo.adiandawuda.com</span></a
         >
         <br />Noah Greupner |
-        <a href="https://noahgreupner.com/" target="_blank"><span class="italic text-blue-500">noahgreupner.com</span></a>
+        <a href="https://noahgreupner.com/" target="_blank"
+          ><span class="italic text-blue-500">noahgreupner.com</span></a
+        >
         <br />Nimrod Kibet |
         <a href="https://portfolio-mandela.vercel.app/" target="_blank"
           ><span class="italic text-blue-500">kibetnimrod.com</span></a
