@@ -81,13 +81,6 @@ let inherits = function (subClass, superClass) {
 
 
 
-
-
-
-
-
-
-
 let possibleConstructorReturn = function (self, call) {
   if (!self) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -159,9 +152,9 @@ let LayerSwitcher = function (_Control) {
         classCallCheck(this, LayerSwitcher);
 
         let options = Object.assign({}, opt_options);
-        // TODO Next: Rename to showButtonTitle
+        //  Rename to showButtonTitle
         let tipLabel = options.tipLabel ? options.tipLabel : 'Legend';
-        // TODO Next: Rename to hideButtonTitle
+        // Rename to hideButtonTitle
         let collapseTipLabel = options.collapseTipLabel ? options.collapseTipLabel : 'Collapse legend';
         let element = document.createElement('div');
 
@@ -169,9 +162,9 @@ let LayerSwitcher = function (_Control) {
 
         _this.activationMode = options.activationMode || 'mouseover';
         _this.startActive = options.startActive === true;
-        // TODO Next: Rename to showButtonContent
+        // Rename to showButtonContent
         let label = options.label !== undefined ? options.label : '';
-        // TODO Next: Rename to hideButtonContent
+        // Rename to hideButtonContent
         let collapseLabel = options.collapseLabel !== undefined ? options.collapseLabel : '\xBB';
         _this.groupSelectStyle = LayerSwitcher.getGroupSelectStyle(options.groupSelectStyle);
         _this.reverse = options.reverse !== false;
@@ -194,7 +187,7 @@ let LayerSwitcher = function (_Control) {
         element.classList.add(CSS_PREFIX + 'group-select-style-' + _this.groupSelectStyle);
         element.classList.add(CSS_PREFIX + 'activation-mode-' + _this.activationMode);
         if (_this.activationMode === 'click') {
-            // TODO Next: Remove in favour of layer-switcher-activation-mode-click
+            // Remove in favour of layer-switcher-activation-mode-click
             element.classList.add('activationModeClick');
             if (_this.startActive) {
                 button.textContent = collapseLabel;

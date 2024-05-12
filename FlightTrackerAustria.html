@@ -24,6 +24,9 @@
       href="https://openlayers.org/en/v5.3.0/css/ol.css"
       type="text/css"
     />
+     <!-- CSS Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- JavaScript Libraries -->
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -368,9 +371,12 @@
             name: aircraft[INDEX_CALLSIGN],
             origin: aircraft[INDEX_ORIGIN_COUNTRY],
             category: aircraft[INDEX_CATEGORY],
-            altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000, // converted from m to km and rounded to 3 decimals
-            velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6), // converted from m/s to km/h and rounded to closest whole number
-            imageSrc: getMarkerImageSrc(), // Change aircraft icon according to basemap (dark/light)
+            // convert from m to km and rounded to 3 decimals
+            altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000, 
+            // converted from m/s to km/h and rounded to closest whole number
+            velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6), 
+            // Change aircraft icon according to basemap (dark/light)
+            imageSrc: getMarkerImageSrc(), 
             size: 0.5,
             rotation: (aircraft[INDEX_TRUE_TRACK] / 180) * Math.PI, // adjusted for initial rotation of plane icon
           }));
@@ -396,7 +402,7 @@
 
   <!-- HTML body -->
 
-  <body onload="init();">
+  <body class="text-md text-white" onload="init();">
     <!-- Header -->
     <div id="header">
       <p>Live Flight Tracker Austria</p>
@@ -410,15 +416,15 @@
     <!-- Panel -->
     <div id="panel">
       <!-- Provide general information about the application and it's stakeholders -->
-      <h4 style="text-align: center">About</h4>
+      <h4 class="text-center text-xl font-bold">About </h4>
       <p>
         This project showcases a web-based application using HTML, CSS, and
         JavaScript with the OpenLayers library to display real-time flight data
         over Austria. The application parses and makes use of sourced data with
         JavaScript functions, providing input for the OpenLayers map.
-      </p>
+      </p> 
 
-      <p>
+      <p class="pt-3">
         Primary stakeholders for this project currently include aviation
         enthusiasts and fellow web developers. In the future, with further
         development, this application can prove useful for professional use and
@@ -426,7 +432,7 @@
       </p>
 
       <!-- Provide information on data sources -->
-      <h4 style="text-align: center">Data</h4>
+      <h4 class="text-center">Data</h4>
       <ul>
         <li>
           Aircraft information:
@@ -450,7 +456,7 @@
         </li>
       </ul>
 
-      <h4 style="text-align: center">Implementation</h4>
+      <h4 class="text-center">Implementation</h4>
 
       <p>
         This flight tracking application is developed using HTML, CSS, and
@@ -462,7 +468,7 @@
         parts.
       </p>
 
-      <h4 style="text-align: center">Authors</h4>
+      <h4 class="text-center">Authors</h4>
 
       <!-- Acknowledge the developers and link to their ePortfolios -->
       <p>
