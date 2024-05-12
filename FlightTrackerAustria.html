@@ -1,425 +1,485 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <!-- Metadata -->
-    <meta name="author" content="Adian Dawuda, Nimrod M. Kibet, Noah Greupner" />
-    <meta name="description" Content="Live Flight Tracker Austria" />
-    <meta charset="UTF-8">
+    <meta
+      name="author"
+      content="Adian Dawuda, Nimrod M. Kibet, Noah Greupner"
+    />
+    <meta name="description" content="Live Flight Tracker Austria" />
+    <meta charset="UTF-8" />
     <!-- Title and Icon -->
     <title>Flight tracker Austria</title>
-    <link rel="icon" type="image/x-icon" href="data/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="data/favicon.ico" />
     <!-- CSS Stylesheets -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+    />
     <!-- OL CSS -->
-    <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
+    <link
+      rel="stylesheet"
+      href="https://openlayers.org/en/v5.3.0/css/ol.css"
+      type="text/css"
+    />
     <!-- JavaScript Libraries -->
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- OL JS -->
-    <script src="https://openlayers.org/en/v5.3.0/build/ol.js" type="text/javascript"></script>
+    <script
+      src="https://openlayers.org/en/v5.3.0/build/ol.js"
+      type="text/javascript"
+    ></script>
     <!-- OL LayerSwitcher Plugin -->
     <link rel="stylesheet" href="ol-layerswitcher/ol-layerswitcher.css" />
-    <script src="ol-layerswitcher/ol-layerswitcher.js" type="text/javascript"></script>
+    <script
+      src="ol-layerswitcher/ol-layerswitcher.js"
+      type="text/javascript"
+    ></script>
     <!-- JavaScript Code -->
     <script type="text/javascript">
+      //Array to store features for the markers
+      let features = [];
 
-        //Array to store features for the markers
-        let features = [];
+      // Function to draw a marker on the map
+      function drawMarker(posMarker) {
+        const feature = new ol.Feature({
+          geometry: new ol.geom.Point(posMarker.coordinates),
+          name: posMarker.name,
+          origin: posMarker.origin,
+          altitude: posMarker.altitude,
+          velocity: posMarker.velocity,
+        });
+        //Style marker and apply the style on the markers
+        const iconStyle = new ol.style.Style({
+          image: new ol.style.Icon({
+            anchor: [0, 0],
+            anchorXUnits: "pixels",
+            anchorYUnits: "pixels",
+            src: posMarker.imageSrc,
+            scale: posMarker.size,
+            rotation: posMarker.rotation,
+          }),
+        });
+        feature.setStyle(iconStyle);
+        features.push(feature);
+      }
 
-        // Function to draw a marker on the map
-        function drawMarker(posMarker) {
-            const feature = new ol.Feature({
-                geometry: new ol.geom.Point(posMarker.coordinates),
-                name: posMarker.name,
-                origin: posMarker.origin,
-                altitude: posMarker.altitude,
-                velocity: posMarker.velocity
+      function init() {
+        //function to initialize the map and its functionalities
 
-            });
-            //Style marker and apply the style on the markers
-            const iconStyle = new ol.style.Style({
-                image: new ol.style.Icon({
-                    anchor: [0, 0],
-                    anchorXUnits: 'pixels',
-                    anchorYUnits: 'pixels',
-                    src: posMarker.imageSrc,
-                    scale: posMarker.size,
-                    rotation: posMarker.rotation,
-                }),
-            });
-            feature.setStyle(iconStyle);
-            features.push(feature);
+        //letiable to store fetched API JSON data
+        let jsonData;
+        //URL to fetch live flight data for Austria's bounding box
+        const skyURL =
+          "https://opensky-network.org/api/states/all?lamin=46.3721&lomin=9.5308&lamax=49.0205&lomax=17.1607";
+
+        // Define constants for JSON data indices
+        const INDEX_ICAO24 = 0;
+        const INDEX_CALLSIGN = 1;
+        const INDEX_ORIGIN_COUNTRY = 2;
+        const INDEX_TIME_POSITION = 3;
+        const INDEX_LAST_CONTACT = 4;
+        const INDEX_LONGITUDE = 5;
+        const INDEX_LATITUDE = 6;
+        const INDEX_BARO_ALTITUDE = 7;
+        const INDEX_ON_GROUND = 8;
+        const INDEX_VELOCITY = 9;
+        const INDEX_TRUE_TRACK = 10;
+        const INDEX_VERTICAL_RATE = 11;
+        const INDEX_SENSORS = 12;
+        const INDEX_GEO_ALTITUDE = 13;
+        const INDEX_SQUAWK = 14;
+        const INDEX_SPI = 15;
+        const INDEX_POSITION_SOURCE = 16;
+        const INDEX_CATEGORY = 17;
+
+        // Create layers for the map
+        let vectorSource = new ol.source.Vector({
+          features: features,
+        });
+
+        let aircraftLayer = new ol.layer.Vector({
+          source: vectorSource,
+        });
+
+        //Array to store Stadia Maps basemap layers
+        let stadiaLayers = [];
+        //Names of Stadia Maps basemap styles
+        let stadiaStyles = ["alidade_smooth", "alidade_smooth_dark"];
+        //Label names for the basemap styles
+        let stadiaLabelNames = ["Stadia Light", "Stadia Dark"];
+        //Initial visibility of basemap layers
+        let visibility = ["false", "true"];
+
+        //Loop through basemap styles to create corresponding layers
+        for (let i = 0; i < stadiaStyles.length; i++) {
+          stadiaLayers.push(
+            new ol.layer.Tile({
+              title: stadiaLabelNames[i],
+              type: "base",
+              visible: visibility[i],
+              preload: Infinity,
+              source: new ol.source.XYZ({
+                // URL pattern for Stadia Maps tiles
+                url:
+                  "https://tiles.stadiamaps.com/tiles/" +
+                  stadiaStyles[i] +
+                  "/{z}/{x}/{y}@2x.png?api_key=1ccc1cb9-0c96-41ad-84ae-cf7022a50d03",
+                //Attributions for Stadia Maps (required for our (older) OpenLayers version)
+                attributions: [
+                  '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>',
+                  '&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>',
+                  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+                ],
+                tilePixelRatio: 2,
+                maxZoom: 20,
+              }),
+            })
+          );
         }
 
-        function init() { //function to initialize the map and its functionalities 
+        //WFS of the administrative units of Austria (Federal State Level)
+        const AustriaWFS = new ol.layer.Vector({
+          source: new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: "https://www.statistik.at/gs-open/GEODATA/wfs?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typename=STATISTIK_AUSTRIA_NUTS2_20240101&srsName=EPSG:3857&outputFormat=application/json",
+          }),
+          //Style for WFS
+          style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: "#d3d3d3",
+              width: 1,
+            }),
+            fill: new ol.style.Fill({
+              color: "rgba(128, 128, 128, 0.2)",
+            }),
+          }),
+        });
 
-            //letiable to store fetched API JSON data
-            let jsonData;
-            //URL to fetch live flight data for Austria's bounding box
-            const skyURL = "https://opensky-network.org/api/states/all?lamin=46.3721&lomin=9.5308&lamax=49.0205&lomax=17.1607";
+        // Listen to the change event of the WFS source
+        AustriaWFS.getSource().on("change", function (e) {
+          if (AustriaWFS.getSource().getState() === "ready") {
+            // If the state of the source is 'ready', execute fetchAndDraw
+            fetchAndDraw();
+            // Also clear the event listener to prevent multiple executions
+            AustriaWFS.getSource().un("change", arguments.callee);
+          }
+        });
+        //Set an automated update interval to 5 sec
+        setInterval(function () {
+          fetchAndDraw();
+        }, 5000);
 
-            // Define constants for JSON data indices
-            const INDEX_ICAO24 = 0;
-            const INDEX_CALLSIGN = 1;
-            const INDEX_ORIGIN_COUNTRY = 2;
-            const INDEX_TIME_POSITION = 3;
-            const INDEX_LAST_CONTACT = 4;
-            const INDEX_LONGITUDE = 5;
-            const INDEX_LATITUDE = 6;
-            const INDEX_BARO_ALTITUDE = 7;
-            const INDEX_ON_GROUND = 8;
-            const INDEX_VELOCITY = 9;
-            const INDEX_TRUE_TRACK = 10;
-            const INDEX_VERTICAL_RATE = 11;
-            const INDEX_SENSORS = 12;
-            const INDEX_GEO_ALTITUDE = 13;
-            const INDEX_SQUAWK = 14;
-            const INDEX_SPI = 15;
-            const INDEX_POSITION_SOURCE = 16;
-            const INDEX_CATEGORY = 17;
+        // Create layer groups for basemaps, WFS, and aircraft layer
+        let map = new ol.Map({
+          layers: [
+            new ol.layer.Group({
+              title: "BaseMaps",
+              layers: stadiaLayers,
+            }),
+            new ol.layer.Group({
+              title: "Austria borders",
+              combine: false,
+              layers: [AustriaWFS],
+            }),
+            aircraftLayer,
+          ],
+          //Target element to render the map
+          target: document.getElementById("map"),
+          //Map controls
+          controls: ol.control
+            .defaults({
+              attributionOptions: {
+                collapsible: false,
+              },
+            })
+            .extend([new ol.control.ScaleLine()]),
+          //Initial view settings set to Austria with an appropriate zoom factor
+          view: new ol.View({
+            center: ol.proj.transform([13.4, 47.8], "EPSG:4326", "EPSG:3857"),
+            zoom: 8,
+          }),
+        });
 
-            // Create layers for the map
-            let vectorSource = new ol.source.Vector({
-                features: features,
+        //add layer switcher
+        const layerSwitcher = new ol.control.LayerSwitcher({
+          tipLabel: "Layers",
+        });
+        map.addControl(layerSwitcher);
+
+        // Function to fetch JSON data from the specified URL
+        function fetchData(url) {
+          return fetch(url)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response not ok!");
+              }
+              // Return response JSON data
+              return response.json();
+            })
+            .then((data) => {
+              // Assign JSON data to jsonData
+              jsonData = data;
+              return jsonData;
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
             });
-
-            let aircraftLayer = new ol.layer.Vector({
-                source: vectorSource,
-            });
-
-            //Array to store Stadia Maps basemap layers
-            let stadiaLayers = [];
-            //Names of Stadia Maps basemap styles
-            let stadiaStyles = ['alidade_smooth', 'alidade_smooth_dark'];
-            //Label names for the basemap styles
-            let stadiaLabelNames = ['Stadia Light', 'Stadia Dark'];
-            //Initial visibility of basemap layers
-            let visibility = ['false', 'true'];
-
-            //Loop through basemap styles to create corresponding layers
-            for (let i = 0; i < stadiaStyles.length; i++) {
-                stadiaLayers.push(new ol.layer.Tile({
-                    title: stadiaLabelNames[i],
-                    type: 'base',
-                    visible: visibility[i],
-                    preload: Infinity,
-                    source: new ol.source.XYZ({
-                        // URL pattern for Stadia Maps tiles
-                        url: 'https://tiles.stadiamaps.com/tiles/' + stadiaStyles[i] + '/{z}/{x}/{y}@2x.png?api_key=1ccc1cb9-0c96-41ad-84ae-cf7022a50d03',
-                        //Attributions for Stadia Maps (required for our (older) OpenLayers version)
-                        attributions: [
-                            '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>',
-                            '&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a>',
-                            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-                        ],
-                        tilePixelRatio: 2,
-                        maxZoom: 20
-                    })
-                }));
-            }
-
-            //WFS of the administrative units of Austria (Federal State Level)
-            const AustriaWFS = new ol.layer.Vector({
-                source: new ol.source.Vector({
-                    format: new ol.format.GeoJSON(),
-                    url: 'https://www.statistik.at/gs-open/GEODATA/wfs?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typename=STATISTIK_AUSTRIA_NUTS2_20240101&srsName=EPSG:3857&outputFormat=application/json',
-                }),
-                //Style for WFS
-                style: new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: '#d3d3d3',
-                        width: 1,
-                    }),
-                    fill: new ol.style.Fill({
-                        color: 'rgba(128, 128, 128, 0.2)',
-                    }),
-                }),
-            });
-
-            // Listen to the change event of the WFS source
-            AustriaWFS.getSource().on('change', function (e) {
-                if (AustriaWFS.getSource().getState() === 'ready') {
-                    // If the state of the source is 'ready', execute fetchAndDraw
-                    fetchAndDraw();
-                    // Also clear the event listener to prevent multiple executions
-                    AustriaWFS.getSource().un('change', arguments.callee);
-                }
-            });
-            //Set an automated update interval to 5 sec
-            setInterval(function () {
-                fetchAndDraw()
-            }, 5000);
-
-            // Create layer groups for basemaps, WFS, and aircraft layer
-            let map = new ol.Map({
-                layers: [
-                    new ol.layer.Group({
-                        title: 'BaseMaps',
-                        layers: stadiaLayers
-                    }),
-                    new ol.layer.Group({
-                        title: 'Austria borders',
-                        combine: false,
-                        layers: [AustriaWFS]
-                    }), aircraftLayer],
-                //Target element to render the map            
-                target: document.getElementById('map'),
-                //Map controls
-                controls: ol.control.defaults({
-                    attributionOptions: ({
-                        collapsible: false
-                    })
-                }).extend([new ol.control.ScaleLine()]),
-                //Initial view settings set to Austria with an appropriate zoom factor
-                view: new ol.View({
-                    center: ol.proj.transform([13.4, 47.8], 'EPSG:4326', 'EPSG:3857'),
-                    zoom: 8,
-                }),
-            });
-
-
-
-            //add layer switcher
-            const layerSwitcher = new ol.control.LayerSwitcher({
-                tipLabel: 'Layers'
-            });
-            map.addControl(layerSwitcher);
-
-            // Function to fetch JSON data from the specified URL
-            function fetchData(url) {
-                return fetch(url)
-                    .then((response) => {
-                        if (!response.ok) {
-                            throw new Error("Network response not ok!");
-                        }
-                        // Return response JSON data
-                        return response.json();
-                    })
-                    .then((data) => {
-                        // Assign JSON data to jsonData
-                        jsonData = data;
-                        return jsonData;
-                    })
-                    .catch((error) => {
-                        console.error("Error fetching data:", error);
-                    });
-            }
-
-            //Function to fetch flight data and draw on the map
-            function fetchAndDraw() {
-
-                // Fetch data from the specified URL
-                fetchData(skyURL)
-                    .then(() => {
-                        //Clear existing features
-                        vectorSource.clear();
-                        //Empty features array
-                        features = [];
-                        //Extract aircraft features from JSON data
-                        let aircraftFeatures = extractAircraftFeatures(jsonData);
-                        //Extract geometries from WFS layer
-                        let wfsGeometries = extractWFSGeometries(AustriaWFS);
-                        //Draw markers for each aircraft feature
-                        for (let data of aircraftFeatures) {
-                            //Check if the marker is within any of the WFS geometries
-                            if (isMarkerWithinGeometries(data, wfsGeometries)) {
-                                drawMarker(data);
-                            }
-                        }
-                        // Update the vector source with new features
-                        vectorSource.addFeatures(features);
-
-                        // Refresh the aircraft layer
-                        aircraftLayer.getSource().refresh();
-
-                        // Initialize popups for markers on the map
-                        initPopups(map);
-                    });
-
-            }
-
-            // Function to extract geometries from WFS layer
-            function extractWFSGeometries(wfsLayer) {
-                let WFSgeometries = [];
-                wfsLayer.getSource().forEachFeature((feature) => {
-                    WFSgeometries.push(feature.getGeometry());
-                });
-                return WFSgeometries;
-            }
-
-            // Function to check if a marker is within any of the WFS geometries
-            function isMarkerWithinGeometries(markerData, wfsGeometries) {
-                const markerCoordinates = [markerData.coordinates[0], markerData.coordinates[1]];
-                const markerPoint = new ol.geom.Point(markerCoordinates);
-                for (const geometry of wfsGeometries) {
-                    if (geometry.intersectsCoordinate(markerCoordinates)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            function initPopups(map) {
-                //Create popup components 
-                const element = document.getElementById('popup');
-                const popup = new ol.Overlay({
-                    element: element,
-                    positioning: 'bottom-center',
-                    stopEvent: false,
-                });
-                //add popup overlay to the map
-                map.addOverlay(popup);
-
-                //Declare letiable to store popover instance
-                let popover;
-
-                function disposePopover() {
-                    if (popover) {
-                        popover.dispose();
-                        popover = undefined;
-                    }
-                }
-
-                // Display popup on click only for aircraft layer features
-                map.on('singleclick', function (evt) {
-                    const feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                        if (layer == aircraftLayer) {
-                            return feature;
-                        }
-                    }, {
-                        layerFilter: function (layer) {
-                            return layer == aircraftLayer;
-                        }
-                    });
-                    disposePopover();
-                    if (!feature) {
-                        return;
-                    }
-                    popup.setPosition(evt.coordinate);
-                    popover = new bootstrap.Popover(element, {
-                        placement: 'top',
-                        html: true,
-                        content:
-                            '<b>Flight information: </b>' +
-                            '<br>Aircraft call sign: ' + feature.get('name') +
-                            '<br>Country of origin: ' + feature.get('origin') +
-                            '<br>Aircraft Altitude (km): ' + feature.get('altitude') +
-                            '<br>Aircraft Velocity (km/h): ' + feature.get('velocity'),
-                    });
-                    popover.show();
-                });
-
-                // Change mouse cursor when over aircraft layer feature
-                map.on('pointermove', function (e) {
-                    const pixel = map.getEventPixel(e.originalEvent);
-                    const hit = map.hasFeatureAtPixel(pixel, {
-                        layerFilter: function (layer) {
-                            return layer == aircraftLayer;
-                        }
-                    });
-                    map.getTarget().style.cursor = hit ? 'pointer' : '';
-                });
-
-                // Close the popup when the map is moved
-                map.on('movestart', disposePopover);
-            }
-
-
-            // Function to extract aircraft features from JSON data
-            function extractAircraftFeatures(jsonData) {
-                const aircraftFeatures = jsonData.states.map((aircraft) => ({
-                    coordinates: ol.proj.transform([aircraft[INDEX_LONGITUDE], aircraft[INDEX_LATITUDE]], 'EPSG:4326', 'EPSG:3857'),
-                    name: aircraft[INDEX_CALLSIGN],
-                    origin: aircraft[INDEX_ORIGIN_COUNTRY],
-                    category: aircraft[INDEX_CATEGORY],
-                    altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000,  // converted from m to km and rounded to 3 decimals
-                    velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6),       // converted from m/s to km/h and rounded to closest whole number
-                    imageSrc: getMarkerImageSrc(), // Change aircraft icon according to basemap (dark/light) 
-                    size: 0.5,
-                    rotation: aircraft[INDEX_TRUE_TRACK] / 180 * Math.PI        // adjusted for initial rotation of plane icon
-                }));
-                return aircraftFeatures;
-            }
-
-            // Function to get the appropriate marker image source based on the basemap
-            function getMarkerImageSrc() {
-                // Check the current basemap style
-                const currentBasemap = stadiaLayers.find(layer => layer.getVisible()).get('title');
-                // If the basemap is 'alidade_smooth', return the path for a different marker image
-                if (currentBasemap === 'Stadia Light') {
-                    return 'data/plane-icon-dark.png'; // Change this to the path of the dark aircraft icons
-                }
-                // Otherwise, return the default white aircraft icon
-                return 'data/plane-icon-light.png';
-            }
-
         }
 
+        //Function to fetch flight data and draw on the map
+        function fetchAndDraw() {
+          // Fetch data from the specified URL
+          fetchData(skyURL).then(() => {
+            //Clear existing features
+            vectorSource.clear();
+            //Empty features array
+            features = [];
+            //Extract aircraft features from JSON data
+            let aircraftFeatures = extractAircraftFeatures(jsonData);
+            //Extract geometries from WFS layer
+            let wfsGeometries = extractWFSGeometries(AustriaWFS);
+            //Draw markers for each aircraft feature
+            for (let data of aircraftFeatures) {
+              //Check if the marker is within any of the WFS geometries
+              if (isMarkerWithinGeometries(data, wfsGeometries)) {
+                drawMarker(data);
+              }
+            }
+            // Update the vector source with new features
+            vectorSource.addFeatures(features);
+
+            // Refresh the aircraft layer
+            aircraftLayer.getSource().refresh();
+
+            // Initialize popups for markers on the map
+            initPopups(map);
+          });
+        }
+
+        // Function to extract geometries from WFS layer
+        function extractWFSGeometries(wfsLayer) {
+          let WFSgeometries = [];
+          wfsLayer.getSource().forEachFeature((feature) => {
+            WFSgeometries.push(feature.getGeometry());
+          });
+          return WFSgeometries;
+        }
+
+        // Function to check if a marker is within any of the WFS geometries
+        function isMarkerWithinGeometries(markerData, wfsGeometries) {
+          const markerCoordinates = [
+            markerData.coordinates[0],
+            markerData.coordinates[1],
+          ];
+          const markerPoint = new ol.geom.Point(markerCoordinates);
+          for (const geometry of wfsGeometries) {
+            if (geometry.intersectsCoordinate(markerCoordinates)) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        function initPopups(map) {
+          //Create popup components
+          const element = document.getElementById("popup");
+          const popup = new ol.Overlay({
+            element: element,
+            positioning: "bottom-center",
+            stopEvent: false,
+          });
+          //add popup overlay to the map
+          map.addOverlay(popup);
+
+          //Declare letiable to store popover instance
+          let popover;
+
+          function disposePopover() {
+            if (popover) {
+              popover.dispose();
+              popover = undefined;
+            }
+          }
+
+          // Display popup on click only for aircraft layer features
+          map.on("singleclick", function (evt) {
+            const feature = map.forEachFeatureAtPixel(
+              evt.pixel,
+              function (feature, layer) {
+                if (layer == aircraftLayer) {
+                  return feature;
+                }
+              },
+              {
+                layerFilter: function (layer) {
+                  return layer == aircraftLayer;
+                },
+              }
+            );
+            disposePopover();
+            if (!feature) {
+              return;
+            }
+            popup.setPosition(evt.coordinate);
+            popover = new bootstrap.Popover(element, {
+              placement: "top",
+              html: true,
+              content:
+                "<b>Flight information: </b>" +
+                "<br>Aircraft call sign: " +
+                feature.get("name") +
+                "<br>Country of origin: " +
+                feature.get("origin") +
+                "<br>Aircraft Altitude (km): " +
+                feature.get("altitude") +
+                "<br>Aircraft Velocity (km/h): " +
+                feature.get("velocity"),
+            });
+            popover.show();
+          });
+
+          // Change mouse cursor when over aircraft layer feature
+          map.on("pointermove", function (e) {
+            const pixel = map.getEventPixel(e.originalEvent);
+            const hit = map.hasFeatureAtPixel(pixel, {
+              layerFilter: function (layer) {
+                return layer == aircraftLayer;
+              },
+            });
+            map.getTarget().style.cursor = hit ? "pointer" : "";
+          });
+
+          // Close the popup when the map is moved
+          map.on("movestart", disposePopover);
+        }
+
+        // Function to extract aircraft features from JSON data
+        function extractAircraftFeatures(jsonData) {
+          const aircraftFeatures = jsonData.states.map((aircraft) => ({
+            coordinates: ol.proj.transform(
+              [aircraft[INDEX_LONGITUDE], aircraft[INDEX_LATITUDE]],
+              "EPSG:4326",
+              "EPSG:3857"
+            ),
+            name: aircraft[INDEX_CALLSIGN],
+            origin: aircraft[INDEX_ORIGIN_COUNTRY],
+            category: aircraft[INDEX_CATEGORY],
+            altitude: Math.round(aircraft[INDEX_GEO_ALTITUDE]) / 1000, // converted from m to km and rounded to 3 decimals
+            velocity: Math.round(aircraft[INDEX_VELOCITY] * 3.6), // converted from m/s to km/h and rounded to closest whole number
+            imageSrc: getMarkerImageSrc(), // Change aircraft icon according to basemap (dark/light)
+            size: 0.5,
+            rotation: (aircraft[INDEX_TRUE_TRACK] / 180) * Math.PI, // adjusted for initial rotation of plane icon
+          }));
+          return aircraftFeatures;
+        }
+
+        // Function to get the appropriate marker image source based on the basemap
+        function getMarkerImageSrc() {
+          // Check the current basemap style
+          const currentBasemap = stadiaLayers
+            .find((layer) => layer.getVisible())
+            .get("title");
+          // If the basemap is 'alidade_smooth', return the path for a different marker image
+          if (currentBasemap === "Stadia Light") {
+            return "data/plane-icon-dark.png"; // Change this to the path of the dark aircraft icons
+          }
+          // Otherwise, return the default white aircraft icon
+          return "data/plane-icon-light.png";
+        }
+      }
     </script>
-</head>
+  </head>
 
-<!-- HTML body -->
+  <!-- HTML body -->
 
-<body onload="init();">
-
+  <body onload="init();">
     <!-- Header -->
     <div id="header">
-        <p>Live Flight Tracker Austria</p>
+      <p>Live Flight Tracker Austria</p>
     </div>
 
     <!-- Map Container -->
     <div id="map">
-        <div id="popup"></div>
+      <div id="popup"></div>
     </div>
 
     <!-- Panel -->
     <div id="panel">
+      <!-- Provide general information about the application and it's stakeholders -->
+      <h4 style="text-align: center">About</h4>
+      <p>
+        This project showcases a web-based application using HTML, CSS, and
+        JavaScript with the OpenLayers library to display real-time flight data
+        over Austria. The application parses and makes use of sourced data with
+        JavaScript functions, providing input for the OpenLayers map.
+      </p>
 
-        <!-- Provide general information about the application and it's stakeholders -->
-        <h4 style="text-align: center;">About</h4>
-        <p>This project showcases a web-based application using HTML, CSS, and JavaScript with the OpenLayers library to
-            display real-time flight data over Austria. The application parses and makes use of sourced data with JavaScript functions, 
-            providing input for the OpenLayers map.</p>
+      <p>
+        Primary stakeholders for this project currently include aviation
+        enthusiasts and fellow web developers. In the future, with further
+        development, this application can prove useful for professional use and
+        could be partially or entirely offered as a service.
+      </p>
 
-        <p>Primary stakeholders for this project currently include aviation enthusiasts and fellow web developers.
-            In the future, with further development, this application can prove useful for professional use and could be
-            partially or entirely offered as a service.</p>
+      <!-- Provide information on data sources -->
+      <h4 style="text-align: center">Data</h4>
+      <ul>
+        <li>
+          Aircraft information:
+          <a href="https://opensky-network.org/" target="_blank"
+            >OpenSky Network</a
+          >
+        </li>
+        <li>
+          Basemaps:
+          <a href="https://stadiamaps.com/" target="_blank"
+            >Stadia Maps basemaps</a
+          >
+        </li>
+        <li>
+          Austrian state borders:
+          <a
+            href="https://data.statistik.gv.at/web/meta.jsp?dataset=OGDEXT_REG_SRV_1"
+            target="_blank"
+            >Statistik Austria</a
+          >
+        </li>
+      </ul>
 
-        <!-- Provide information on data sources -->
-        <h4 style="text-align: center;">Data</h4>
-        <ul>
-            <li>Aircraft information: <a href="https://opensky-network.org/" target="_blank">OpenSky
-                    Network</a></li>
-            <li> Basemaps: <a href="https://stadiamaps.com/" target="_blank">Stadia Maps basemaps</a></li>
-            <li> Austrian state borders: <a href="https://data.statistik.gv.at/web/meta.jsp?dataset=OGDEXT_REG_SRV_1"
-                    target="_blank">Statistik Austria</a></li>
-        </ul>
+      <h4 style="text-align: center">Implementation</h4>
 
-        <h4 style="text-align: center;">Implementation</h4>
+      <p>
+        This flight tracking application is developed using HTML, CSS, and
+        JavaScript along with the OpenLayers library. A more detailed overview
+        and all of the code for this project can be found in
+        <a href="https://github.com/AdianDawuda/FlightMap" target="_blank"
+          >the project's GitHub repository</a
+        >. The code contains extensive inline documentation explaining all key
+        parts.
+      </p>
 
+      <h4 style="text-align: center">Authors</h4>
 
-        <p>This flight tracking application is developed using HTML, CSS, and JavaScript along with the OpenLayers
-            library.
-            A more detailed overview and all of the code for this project can be found in
-            <a href="https://github.com/AdianDawuda/FlightMap" target="_blank">the project's GitHub repository</a>.
-            The code contains extensive inline documentation explaining all key parts.</p>
-
-        <h4 style="text-align: center;">Authors</h4>
-
-        <!-- Acknowledge the developers and link to their ePortfolios -->
-        <p>
-            Adian Dawuda | <a href="https://geo.adiandawuda.com/" target="_blank">geo.adiandawuda.com</a>
-            <br>Noah Greupner | <a href="https://noahgreupner.com/" target="_blank">noahgreupner.com</a>
-            <br>Nimrod M. Kibet | <a href="https://portfolio-mandela.vercel.app/"
-                target="_blank">portfolio-mandela.vercel.app</a>
-        </p>
+      <!-- Acknowledge the developers and link to their ePortfolios -->
+      <p>
+        Adian Dawuda |
+        <a href="https://geo.adiandawuda.com/" target="_blank"
+          >geo.adiandawuda.com</a
+        >
+        <br />Noah Greupner |
+        <a href="https://noahgreupner.com/" target="_blank">noahgreupner.com</a>
+        <br />Nimrod M. Kibet |
+        <a href="https://portfolio-mandela.vercel.app/" target="_blank"
+          >kibetnimrod.com</a
+        >
+      </p>
     </div>
 
     <!-- Footer -->
     <div id="footer"></div>
-</body>
-
+  </body>
 </html>
