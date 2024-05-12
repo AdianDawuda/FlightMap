@@ -171,13 +171,4 @@ li.layer-switcher-base-group > label {
   border-right: 0;
 }
 
-/*layerswitcher on the left*/
-/*
-.layer-switcher.shown.layer-switcher-activation-mode-click {
-  padding-right: 34px;
-}
-.layer-switcher.shown.layer-switcher-activation-mode-click > button {
-  right: 0;
-  border-left: 0;
-}
-*/
+
